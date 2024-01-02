@@ -22,7 +22,7 @@ public class TransactionController {
     @PostMapping("/")
     public ResponseEntity<Transaction> createTransaction(@RequestBody Transaction transaction) {
         Transaction createdTransaction = transactionService.createTransaction(
-                transaction.getAccount(), transaction.getPayee(), transaction.getCategory(),
+                transaction.getAccount().getAccountId(), transaction.getPayee().getPayeeId(), transaction.getCategory().getCategoryId(),
                 transaction.getAmount(), transaction.getDate(), transaction.getDescription(),
                 transaction.getType());
         return new ResponseEntity<>(createdTransaction, HttpStatus.CREATED);

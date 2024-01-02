@@ -25,6 +25,9 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Payee> payees = new ArrayList<>();
 
+    @Column(name = "isDeleted")
+    private boolean isDeleted;
+
     public Long getUserId() {
         return userId;
     }
@@ -63,6 +66,14 @@ public class User {
 
     public void setPayees(List<Payee> payees) {
         this.payees = payees;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
     }
 
     public void addPayee(Payee payee) {

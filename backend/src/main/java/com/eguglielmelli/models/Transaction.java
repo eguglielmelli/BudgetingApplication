@@ -12,7 +12,7 @@ public class Transaction {
     @Column(name = "TransactionID")
     private long transactionId;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "AccountID", referencedColumnName = "AccountID")
     private Account account;
 

@@ -10,7 +10,7 @@ public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="CategoryID")
-    private long CategoryID;
+    private Long categoryId;
 
     @ManyToOne
     @JoinColumn(name="UserID",referencedColumnName = "UserID")
@@ -44,9 +44,10 @@ public class Category {
         this.spent = spent;
     }
 
-    public long getCategoryID() {
-        return CategoryID;
+    public Long getCategoryId() {
+        return categoryId;
     }
+
 
     public User getUser() {
         return user;
@@ -70,5 +71,16 @@ public class Category {
 
     public void setBudgetedAmount(BigDecimal budgetedAmount) {
         BudgetedAmount = budgetedAmount;
+    }
+
+
+    public void adjustBalancesForTransaction(BigDecimal amount, TransactionType type) {
+        if (type == TransactionType.OUTFLOW) {
+            this.spent = this.spent.add(amount);
+            this.available = this.available.subtract(amount);
+        }else {
+            this.spent = amount.add(this.spent);
+            this.available = this.available.add(amount);
+        }
     }
 }

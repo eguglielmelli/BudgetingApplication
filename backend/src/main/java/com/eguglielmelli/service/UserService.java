@@ -37,7 +37,7 @@ public class UserService {
             throw new IllegalArgumentException("Name and email cannot be null.");
         }
 
-        if(userRepository.findByEmail(newUser.getEmail()).isPresent()) {
+        if(userRepository.findByEmailAndIsDeletedFalse(newUser.getEmail()).isPresent()) {
             throw new IllegalArgumentException("An account is already associated with this email.");
         }
 
@@ -54,7 +54,7 @@ public class UserService {
             throw new IllegalArgumentException("User email and password cannot be null.");
         }
 
-        User foundUser = userRepository.findByEmail(user.getEmail()).orElse(null);
+        User foundUser = userRepository.findByEmailAndIsDeletedFalse(user.getEmail()).orElse(null);
         if (foundUser != null && passwordEncoder.matches(user.getPassword(), foundUser.getPassword())) {
             return generateJwtToken(foundUser);
         }
@@ -79,7 +79,8 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        userRepository.delete(user);
+        user.setDeleted(true);
+        userRepository.save(user);
     }
 
     private String generateJwtToken(User user) {

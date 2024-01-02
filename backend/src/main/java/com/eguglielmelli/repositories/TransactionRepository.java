@@ -15,4 +15,6 @@ public interface TransactionRepository extends JpaRepository<Transaction,Long> {
     List<Transaction> findByPayee(Payee payee);
 
     List<Transaction> findByDateBetween(Date startDate, Date endDate);
+
+    List<Transaction> findByCategory_User_UserIdAndCategory_CategoryId(Long userId, Long categoryId);
 }
