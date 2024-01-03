@@ -91,6 +91,12 @@ public class CategoryController {
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    @PutMapping("/{categoryId}/updateAmount")
+    public ResponseEntity<Category> updateBudgetedAmount(@PathVariable Long categoryId,@RequestBody  Map<String,BigDecimal> updatedAmount) {
+        BigDecimal newAmount = updatedAmount.get("updatedAmount");
+        Category category = categoryService.updateBudgetAmount(categoryId,newAmount);
+        return ResponseEntity.ok(category);
+    }
 
 
 }

@@ -27,5 +27,15 @@ public class TransactionController {
                 transaction.getType());
         return new ResponseEntity<>(createdTransaction, HttpStatus.CREATED);
     }
+    @PutMapping("/{id}/update")
+    public ResponseEntity<Transaction> updateTransaction(@PathVariable Long id, @RequestBody Transaction transaction) {
+        transactionService.update(id,transaction);
+        return ResponseEntity.ok().build();
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<Transaction> getTransaction(@PathVariable Long id) {
+        Transaction transaction = transactionService.findTransactionById(id);
+        return ResponseEntity.ok(transaction);
+    }
 
 }

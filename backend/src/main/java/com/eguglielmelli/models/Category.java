@@ -75,6 +75,12 @@ public class Category {
 
 
     public void adjustBalancesForTransaction(BigDecimal amount, TransactionType type) {
+        if (this.spent == null) {
+            this.spent = BigDecimal.ZERO;
+        }
+        if (this.available == null) {
+            this.available = BigDecimal.ZERO;
+        }
         if (type == TransactionType.OUTFLOW) {
             this.spent = this.spent.add(amount);
             this.available = this.available.subtract(amount);
@@ -82,5 +88,14 @@ public class Category {
             this.spent = amount.add(this.spent);
             this.available = this.available.add(amount);
         }
+    }
+    public void adjustBudgetedAndAvailableAmount(BigDecimal amount) {
+        if(amount == null) return;
+
+        BigDecimal currentBudgetedAmount = this.getBudgetedAmount();
+        BigDecimal currentAvailableAmount = this.getAvailable();
+
+        this.setBudgetedAmount(currentBudgetedAmount.add(amount));
+        this.setAvailable(currentAvailableAmount.add(amount));
     }
 }

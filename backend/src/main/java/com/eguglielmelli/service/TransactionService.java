@@ -102,6 +102,11 @@ public class TransactionService {
         return transactionRepository.save(transaction);
 
     }
+    @Transactional
+    public Transaction findTransactionById(Long id) {
+        Transaction transaction = transactionRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("No transaction with that ID."));
+        return transaction;
+    }
 
     @Transactional
     public List<Transaction> findTransactionsByCategory(Category category) {

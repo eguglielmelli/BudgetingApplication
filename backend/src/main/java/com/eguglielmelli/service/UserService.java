@@ -3,6 +3,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.text.WordUtils;
 import com.eguglielmelli.models.User;
 import com.eguglielmelli.repositories.UserRepository;
+import org.apache.commons.validator.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,6 +13,7 @@ import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.validator.routines.EmailValidator;
 
 @Service
 public class UserService {
@@ -35,6 +37,9 @@ public class UserService {
 
         if(newUser.getName() == null || newUser.getName().isEmpty() || newUser.getEmail() == null || newUser.getEmail().isEmpty()) {
             throw new IllegalArgumentException("Name and email cannot be null.");
+        }
+        if(!EmailValidator.getInstance().isValid(newUser.getEmail())) {
+            throw new IllegalArgumentException("Please enter a valid email.");
         }
 
         if(userRepository.findByEmailAndIsDeletedFalse(newUser.getEmail()).isPresent()) {

@@ -67,6 +67,12 @@ public class CategoryService {
         foundCategory.setName(updatedName);
         return categoryRepository.save(foundCategory);
     }
+    @Transactional
+    public Category updateBudgetAmount(Long id, BigDecimal amount) {
+        Category category = categoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Category with that ID does not exist."));
+        category.adjustBudgetedAndAvailableAmount(amount);
+        return category;
+    }
 
     public Optional<Category> findById(Long categoryId) {
         return categoryRepository.findById(categoryId);
