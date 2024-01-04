@@ -59,4 +59,9 @@ public class Account {
     public void setBalance(BigDecimal balance) {
         this.balance = balance;
     }
+
+    public void adjustBalanceForTransaction(BigDecimal amount) {
+        BigDecimal currBalance = this.getBalance();
+        this.setBalance(currBalance.add(amount));
+    }
 }

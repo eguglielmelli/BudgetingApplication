@@ -42,6 +42,17 @@ public class AccountService {
         }
         return accountRepository.save(account);
     }
+    @Transactional
+    public Account updateAccountName(Long id,String newName) {
+        Optional<Account> foundAccount = accountRepository.findByAccountId(id);
+        if(!foundAccount.isPresent()) {
+            throw new IllegalArgumentException("There is no account with that ID.");
+        }
+        Account account = foundAccount.get();
+        account.setAccountName(newName);
+        return accountRepository.save(account);
+
+    }
 
     @Transactional
     public void deleteAccount(@PathVariable Long accountId) {

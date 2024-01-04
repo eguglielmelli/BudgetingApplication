@@ -37,5 +37,15 @@ public class TransactionController {
         Transaction transaction = transactionService.findTransactionById(id);
         return ResponseEntity.ok(transaction);
     }
+    @DeleteMapping("/{id}/delete")
+    public ResponseEntity<?> deleteTransaction(@PathVariable Long id) {
+        try {
+            transactionService.delete(id);
+            return ResponseEntity.ok().build(); // Return 200 OK on successful deletion
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build(); // Return 404 Not Found if the transaction doesn't exist
+        }
+    }
+
 
 }

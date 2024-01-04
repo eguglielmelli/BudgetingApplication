@@ -2,6 +2,7 @@ package com.eguglielmelli.service;
 
 import com.eguglielmelli.models.Category;
 import com.eguglielmelli.models.Transaction;
+import com.eguglielmelli.models.TransactionType;
 import com.eguglielmelli.repositories.CategoryRepository;
 import com.eguglielmelli.repositories.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +73,24 @@ public class CategoryService {
         Category category = categoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Category with that ID does not exist."));
         category.adjustBudgetedAndAvailableAmount(amount);
         return category;
+    }
+    @Transactional
+    private void adjustCategoryBalance(Category category, Transaction transaction) {
+        BigDecimal transactionAmount = transaction.getAmount();
+
+        if (transaction.getType() == TransactionType.INFLOW) {
+            // For inflow transactions, decrease the category's spent amount
+            category.setSpent(category.getSpent().subtract(transactionAmount));
+        } else if (transaction.getType() == TransactionType.OUTFLOW) {
+            // For outflow transactions, increase the category's spent amount
+            category.setSpent(category.getSpent().add(transactionAmount));
+        }
+
+        // Update the available amount in the category
+        category.setAvailable(category.getBudgetedAmount().subtract(category.getSpent()));
+
+        // Persist the updated category information
+        categoryRepository.save(category);
     }
 
     public Optional<Category> findById(Long categoryId) {

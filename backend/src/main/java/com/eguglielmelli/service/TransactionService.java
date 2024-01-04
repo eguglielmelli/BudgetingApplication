@@ -53,6 +53,7 @@ public class TransactionService {
         transaction.setPayee(payee);
         transaction.setCategory(category);
         transaction.setAmount(type == TransactionType.OUTFLOW ? amount.negate() : amount);
+        transaction.getAccount().adjustBalanceForTransaction(transaction.getAmount());
         category.adjustBalancesForTransaction(amount,type);
         transaction.setDate(date);
         transaction.setDescription(description);
@@ -75,6 +76,7 @@ public class TransactionService {
         Transaction transaction = transactionRepository.findById(id).orElseThrow(() -> new RuntimeException("Transaction with that ID not found"));
 
         transaction.setAccount(updatedTransaction.getAccount());
+        transaction.getAccount().adjustBalanceForTransaction(updatedTransaction.getAmount());
         transaction.setAmount(updatedTransaction.getAmount());
         transaction.setCategory(updatedTransaction.getCategory());
         updatedTransaction.getCategory().adjustBalancesForTransaction(updatedTransaction.getAmount(),updatedTransaction.getType());
@@ -88,7 +90,12 @@ public class TransactionService {
 
     @Transactional
     public void delete(Long id) {
-        transactionRepository.deleteById(id);
+        Transaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("There is no transaction with that ID."));
+
+        adjustAccountBalance(transaction.getAccount(),transaction);
+        adjustCategoryBalance(transaction.getCategory(),transaction);
+        transactionRepository.delete(transaction);
     }
 
     @Transactional
@@ -167,5 +174,31 @@ public class TransactionService {
         if (transaction.getType() == null) {
             throw new IllegalArgumentException("Transaction type must be specified.");
         }
+    }
+    @Transactional
+    private void adjustAccountBalance(Account account, Transaction transaction) {
+        BigDecimal transactionAmount = transaction.getAmount();
+
+        if (transaction.getType() == TransactionType.INFLOW) {
+            account.setBalance(account.getBalance().subtract(transactionAmount));
+        } else if (transaction.getType() == TransactionType.OUTFLOW) {
+            account.setBalance(account.getBalance().add(transactionAmount));
+        }
+
+        accountRepository.save(account);
+    }
+    @Transactional
+    private void adjustCategoryBalance(Category category, Transaction transaction) {
+        BigDecimal transactionAmount = transaction.getAmount();
+
+        if (transaction.getType() == TransactionType.INFLOW) {
+            category.setSpent(category.getSpent().subtract(transactionAmount));
+        } else if (transaction.getType() == TransactionType.OUTFLOW) {
+            category.setSpent(category.getSpent().add(transactionAmount));
+        }
+
+        category.setAvailable(category.getBudgetedAmount().subtract(category.getSpent()));
+
+        categoryRepository.save(category);
     }
 }
