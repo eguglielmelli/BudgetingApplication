@@ -1,4 +1,8 @@
 package com.eguglielmelli.service;
+import com.eguglielmelli.models.Account;
+import com.eguglielmelli.models.Category;
+import com.eguglielmelli.repositories.AccountRepository;
+import com.eguglielmelli.repositories.CategoryRepository;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.text.WordUtils;
 import com.eguglielmelli.models.User;
@@ -12,6 +16,7 @@ import io.jsonwebtoken.Jwts;
 import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.validator.routines.EmailValidator;
 
@@ -21,14 +26,18 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AccountRepository accountRepository;
+    private final CategoryRepository categoryRepository;
 
     @Value("${jwt.secret}")
     private String jwtSecret;
 
     @Autowired
-    public UserService(UserRepository userRepository,PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository,PasswordEncoder passwordEncoder, AccountRepository accountRepository, CategoryRepository categoryRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.accountRepository = accountRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Transactional
@@ -107,6 +116,15 @@ public class UserService {
                 .setExpiration(exp)
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
+    }
+
+    public List<Account> getAllAccountsForUser(Long userId) {
+        return accountRepository.findByUserUserId(userId);
+
+    }
+
+    public List<Category> getAllCategoriesForUser(Long userId) {
+        return categoryRepository.findByUserUserId(userId);
     }
 
 
