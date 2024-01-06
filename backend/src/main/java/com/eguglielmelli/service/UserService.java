@@ -101,17 +101,16 @@ public class UserService {
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
 
-        long expMillis = nowMillis + 3600000;
+        long expMillis = nowMillis + 3600000; // 1 hour token validity
         Date exp = new Date(expMillis);
-
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("email", user.getEmail());
-
+        claims.put("userId", user.getUserId()); // Include userId in the token claims
 
         return Jwts.builder()
+                .setClaims(claims) // Set the claims
                 .setSubject(user.getEmail())
-                .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(exp)
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
