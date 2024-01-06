@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
+    const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-    const [loginSuccessMessage, setLoginSuccessMessage] = useState(''); // Add state for login success message
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        setErrorMessage(''); // Reset error message
-        setLoginSuccessMessage(''); // Reset login success message
+        setErrorMessage('');
 
         try {
-            const response = await fetch('http://localhost:8082/api/users/login', {
+            const response = await fetch('http://localhost:8082/api/login/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -21,19 +21,19 @@ function Login() {
             });
 
             if (!response.ok) {
-                throw new Error(`Error: ${response.status}`);
+                const errorData = await response.json();
+                setErrorMessage(errorData.message || 'Login failed. Please check your credentials.');
+                return;
             }
 
             const data = await response.json();
-            console.log('Login successful:', data);
-            setLoginSuccessMessage('Login successful!'); // Set success message
-            // Additional handling like storing the token, redirecting, etc.
+            localStorage.setItem('token', data.token);
+            navigate('/dashboard');
         } catch (error) {
             console.error('Login failed:', error);
             setErrorMessage('Login failed. Please check your credentials.');
         }
     };
-
     return (
         <div>
             <h2>Login</h2>
@@ -55,7 +55,6 @@ function Login() {
                     />
                 </div>
                 {errorMessage && <div style={{color: 'red'}}>{errorMessage}</div>}
-                {loginSuccessMessage && <div style={{color: 'green'}}>{loginSuccessMessage}</div>} {/* Display success message */}
                 <div>
                     <button type="submit">Login</button>
                 </div>
