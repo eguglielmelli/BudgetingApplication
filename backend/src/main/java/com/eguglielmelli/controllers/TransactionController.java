@@ -41,9 +41,9 @@ public class TransactionController {
     public ResponseEntity<?> deleteTransaction(@PathVariable Long id) {
         try {
             transactionService.delete(id);
-            return ResponseEntity.ok().build(); // Return 200 OK on successful deletion
+            return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build(); // Return 404 Not Found if the transaction doesn't exist
+            return ResponseEntity.notFound().build();
         }
     }
 

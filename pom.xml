@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <groupId>org.example</groupId>
   <artifactId>BudgetingApplication</artifactId>
   <version>1.0-SNAPSHOT</version>
-
   <name>BudgetingApplication</name>
-  <!-- FIXME change it to the project's website -->
   <url>http://www.example.com</url>
 
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
     <version>2.7.0</version>
-    <relativePath/>
+    <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
   <properties>
@@ -42,12 +39,6 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.testng</groupId>
-          <artifactId>testng</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <!-- MySQL Connector -->
@@ -61,35 +52,42 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.12.0</version> <!-- Use latest stable version -->
+      <version>3.12.0</version>
     </dependency>
 
     <!-- Apache Commons Text -->
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-text</artifactId>
-      <version>1.9</version> <!-- Verify the latest version -->
+      <version>1.9</version>
     </dependency>
 
+    <!-- Spring Boot Starter Security -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
     </dependency>
 
-
+    <!-- JSON Web Token Support -->
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt</artifactId>
       <version>0.9.1</version>
     </dependency>
 
+    <!-- Commons Validator -->
     <dependency>
       <groupId>commons-validator</groupId>
       <artifactId>commons-validator</artifactId>
       <version>1.7</version>
     </dependency>
 
-
+    <!-- Spring Security Test (without version to inherit from Spring Boot) -->
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-test</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -101,3 +99,4 @@
     </plugins>
   </build>
 </project>
+

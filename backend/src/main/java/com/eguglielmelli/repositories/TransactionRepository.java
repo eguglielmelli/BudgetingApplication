@@ -17,4 +17,6 @@ public interface TransactionRepository extends JpaRepository<Transaction,Long> {
     List<Transaction> findByDateBetween(Date startDate, Date endDate);
 
     List<Transaction> findByCategory_User_UserIdAndCategory_CategoryId(Long userId, Long categoryId);
+
+    List<Transaction> findByCategory_User_UserIdAndDateBetween(Long userId,Date startDate,Date endDate);
 }

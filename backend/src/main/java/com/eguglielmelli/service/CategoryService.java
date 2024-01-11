@@ -48,8 +48,8 @@ public class CategoryService {
         List<Transaction> transactions = transactionRepository.findByCategory_User_UserIdAndCategory_CategoryId(userId,categoryId);
         BigDecimal totalSpent = transactions.stream()
                 .map(Transaction::getAmount)
-                .filter(Objects::nonNull)  // Ensure the amount is not null
-                .reduce(BigDecimal.ZERO, BigDecimal::add);  // Sum up the amounts
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return totalSpent;
     }
@@ -79,17 +79,13 @@ public class CategoryService {
         BigDecimal transactionAmount = transaction.getAmount();
 
         if (transaction.getType() == TransactionType.INFLOW) {
-            // For inflow transactions, decrease the category's spent amount
             category.setSpent(category.getSpent().subtract(transactionAmount));
         } else if (transaction.getType() == TransactionType.OUTFLOW) {
-            // For outflow transactions, increase the category's spent amount
             category.setSpent(category.getSpent().add(transactionAmount));
         }
 
-        // Update the available amount in the category
         category.setAvailable(category.getBudgetedAmount().subtract(category.getSpent()));
 
-        // Persist the updated category information
         categoryRepository.save(category);
     }
 

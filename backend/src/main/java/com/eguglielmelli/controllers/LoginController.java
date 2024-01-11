@@ -28,7 +28,6 @@ public class LoginController {
         }
     }
 
-    // A simple DTO to encapsulate the authentication response
     private static class AuthResponse {
         private final String token;
 

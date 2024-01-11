@@ -58,14 +58,12 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
     }
-    // GET endpoint to retrieve all accounts for a user
     @GetMapping("/{userId}/accounts")
     public ResponseEntity<List<Account>> getAllAccounts(@PathVariable Long userId) {
         List<Account> accounts = userService.getAllAccountsForUser(userId);
         return ResponseEntity.ok(accounts);
     }
 
-    // GET endpoint to retrieve all categories for a user
     @GetMapping("/{userId}/categories")
     public ResponseEntity<List<Category>> getAllCategories(@PathVariable Long userId) {
         List<Category> categories = userService.getAllCategoriesForUser(userId);

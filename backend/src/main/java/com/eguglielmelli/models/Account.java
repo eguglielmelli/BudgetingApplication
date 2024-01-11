@@ -24,6 +24,10 @@ public class Account {
     @Column(name = "Balance")
     private BigDecimal balance;
 
+    public void setAccountId(Long accountId) {
+        this.accountId = accountId;
+    }
+
     public long getAccountId() {
         return accountId;
     }

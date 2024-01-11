@@ -34,14 +34,11 @@ public class CategoryController {
             Category category = categoryService.changeCategoryName(categoryId, updatedName);
 
             if (category != null) {
-                // If the category is successfully updated
                 return ResponseEntity.ok(category);
             } else {
-                // If the category is not found
                 return ResponseEntity.notFound().build();
             }
         } catch (Exception e) {
-            // Handle other exceptions, e.g., database exceptions, validation errors, etc.
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating category: " + e.getMessage());
         }
     }
@@ -75,7 +72,6 @@ public class CategoryController {
             BigDecimal totalSpent = categoryService.calculateTotalSpentInCategory(categoryId, userId);
             return new ResponseEntity<>(totalSpent, HttpStatus.OK);
         } catch (Exception e) {
-            // Handle exceptions (e.g., Category or User not found, etc.)
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -87,7 +83,6 @@ public class CategoryController {
             BigDecimal totalSpent = categoryService.calculateAvailableAmount(categoryId, userId);
             return new ResponseEntity<>(totalSpent, HttpStatus.OK);
         } catch (Exception e) {
-            // Handle exceptions (e.g., Category or User not found, etc.)
             return new ResponseEntity<>("Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
