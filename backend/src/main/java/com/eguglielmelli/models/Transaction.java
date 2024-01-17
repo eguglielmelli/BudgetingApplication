@@ -37,7 +37,9 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 
-
+    public void setTransactionId(Long transactionId) {
+        this.transactionId = transactionId;
+    }
     public long getTransactionId() {
         return transactionId;
     }

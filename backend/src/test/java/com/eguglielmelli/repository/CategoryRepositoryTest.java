@@ -36,13 +36,11 @@ public class CategoryRepositoryTest {
 
     @Test
     public void whenFindById_withNonExistentId_thenReturnEmpty() {
-        // Given
+
         Long nonExistentId = 999L;
 
-        // When
         Optional<Category> foundCategory = categoryRepository.findById(nonExistentId);
 
-        // Then
         assertThat(foundCategory).isEmpty();
     }
 }
