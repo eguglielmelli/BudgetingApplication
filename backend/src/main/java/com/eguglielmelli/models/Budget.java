@@ -25,6 +25,8 @@ public class Budget {
     @Column(name = "TotalExpense")
     private BigDecimal totalExpense;
 
+    @Column(name = "readyToAssign", precision=10, scale=2, nullable=false)
+    private BigDecimal readyToAssign;
 
     public long getBudgetId() {
         return budgetId;
@@ -61,4 +63,12 @@ public class Budget {
     public void setTotalExpense(BigDecimal totalExpense) {
         this.totalExpense = totalExpense;
     }
+
+    public BigDecimal getReadyToAssign() {
+        return readyToAssign;
+    }
+    public void setReadyToAssign(BigDecimal readyToAssign) {
+        this.readyToAssign = readyToAssign;
+    }
+
 }

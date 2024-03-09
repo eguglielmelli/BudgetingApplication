@@ -75,6 +75,7 @@ public class TransactionServiceTest {
         testTransaction.setCategory(testCategory);
         Long testTransactionId = 1L;
         testTransaction.setTransactionId(testTransactionId);
+        testTransaction.setAmount(new BigDecimal("500.00"));
 
         lenient().when(accountRepository.findById(anyLong())).thenReturn(Optional.of(testAccount));
         lenient().when(payeeRepository.findById(anyLong())).thenReturn(Optional.of(testPayee));
@@ -126,7 +127,7 @@ public class TransactionServiceTest {
         when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(testTransaction));
 
 
-        transactionService.delete(transactionId);
+        transactionService.deleteTransaction(transactionId);
 
 
         verify(transactionRepository).findById(transactionId);
@@ -145,6 +146,10 @@ public class TransactionServiceTest {
         Transaction existingTransaction = new Transaction();
         existingTransaction.setTransactionId(transactionId);
         existingTransaction.setAccount(testAccount);
+        existingTransaction.setType(TransactionType.INFLOW);
+        existingTransaction.setAmount(new BigDecimal("500.00"));
+        existingTransaction.setDate(new Date());
+
 
         when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(existingTransaction));
 
@@ -157,7 +162,4 @@ public class TransactionServiceTest {
         verify(transactionRepository).save(updatedTransaction);
     }
 
-
-
-    // Additional tests for delete, find, and exception scenarios
 }

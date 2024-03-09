@@ -37,6 +37,9 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 
+    @Transient
+    private TransactionAction action;
+
     public void setTransactionId(Long transactionId) {
         this.transactionId = transactionId;
     }
@@ -98,5 +101,12 @@ public class Transaction {
 
     public void setType(TransactionType type) {
         this.type = type;
+    }
+
+    public void setAction(TransactionAction action) {
+        this.action = action;
+    }
+    public TransactionAction getAction() {
+        return this.action;
     }
 }

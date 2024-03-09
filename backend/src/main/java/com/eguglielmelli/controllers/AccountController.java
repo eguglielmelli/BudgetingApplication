@@ -32,4 +32,10 @@ public class AccountController {
         Account account = accountService.updateAccountName(accountId,updatedName);
         return ResponseEntity.ok(account);
     }
+
+    @GetMapping("/{accountId}")
+    public ResponseEntity<Account> getAccount(@PathVariable Long accountId) {
+        Account account = accountService.findAccountById(accountId);
+        return ResponseEntity.ok(account);
+    }
 }

@@ -1,5 +1,6 @@
 package com.eguglielmelli.controllers;
 
+import com.eguglielmelli.dto.TransferFundsRequest;
 import com.eguglielmelli.models.Transaction;
 import com.eguglielmelli.service.TransactionService;
 import org.apache.coyote.Response;
@@ -40,12 +41,23 @@ public class TransactionController {
     @DeleteMapping("/{id}/delete")
     public ResponseEntity<?> deleteTransaction(@PathVariable Long id) {
         try {
-            transactionService.delete(id);
+            transactionService.deleteTransaction(id);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }
     }
+    @PostMapping("/{accountId}/transfer")
+    public ResponseEntity<?> transferFundsBetweenAccounts(@PathVariable Long accountId, @RequestBody TransferFundsRequest transferRequest) {
+        try {
+            transactionService.transferFundsBetweenAccounts(accountId,transferRequest);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+//    @GetMapping("/{userId}/transactionsByDate")
+//    public
 
 
 }

@@ -20,7 +20,7 @@ public class Category {
     private String name;
 
     @Column(name="BudgetedAmount")
-    private BigDecimal BudgetedAmount;
+    private BigDecimal budgetedAmount;
 
     @Column(name="Available")
     private BigDecimal available;
@@ -70,36 +70,55 @@ public class Category {
     }
 
     public BigDecimal getBudgetedAmount() {
-        return BudgetedAmount;
+        return budgetedAmount;
     }
 
     public void setBudgetedAmount(BigDecimal budgetedAmount) {
-        BudgetedAmount = budgetedAmount;
+        this.budgetedAmount = budgetedAmount;
     }
 
 
-    public void adjustBalancesForTransaction(BigDecimal amount, TransactionType type) {
-        if (this.spent == null) {
-            this.spent = BigDecimal.ZERO;
+    public void adjustBalancesForTransaction(Transaction transaction) {
+        switch(transaction.getAction()) {
+            case CREATE:
+            case UPDATE:
+                applyTransactionEffect(transaction);
+                break;
+            case DELETE:
+                reverseTransactionEffect(transaction);
+                break;
         }
-        if (this.available == null) {
-            this.available = BigDecimal.ZERO;
-        }
-        if (type == TransactionType.OUTFLOW) {
-            this.spent = this.spent.add(amount);
-            this.available = this.available.subtract(amount);
+    }
+    
+    public void applyTransactionEffect(Transaction transaction) {
+        if(transaction.getType() == TransactionType.OUTFLOW) {
+            this.setSpent(this.spent.add(transaction.getAmount()));
         }else {
-            this.spent = amount.add(this.spent);
-            this.available = this.available.add(amount);
+            this.setSpent(this.spent.subtract(transaction.getAmount()));
         }
+        this.setAvailable(this.budgetedAmount.subtract(this.spent));
     }
-    public void adjustBudgetedAndAvailableAmount(BigDecimal amount) {
-        if(amount == null) return;
 
-        BigDecimal currentBudgetedAmount = this.getBudgetedAmount();
-        BigDecimal currentAvailableAmount = this.getAvailable();
-
-        this.setBudgetedAmount(currentBudgetedAmount.add(amount));
-        this.setAvailable(currentAvailableAmount.add(amount));
+    public void reverseTransactionEffect(Transaction transaction) {
+        if(transaction.getType() == TransactionType.OUTFLOW) {
+            this.setSpent(this.spent.subtract(transaction.getAmount()));
+        }else {
+            this.setSpent(this.spent.add(transaction.getAmount()));
+        }
+        this.setAvailable(this.budgetedAmount.subtract(this.spent));
+    }
+    public void adjustBudgetedAndAvailableAmount(CategoryBudgetAction action,BigDecimal amount) {
+        switch(action) {
+            case ADD:
+                this.setBudgetedAmount(this.budgetedAmount.add(amount));
+                break;
+            case SUBTRACT:
+                this.setBudgetedAmount(this.budgetedAmount.subtract(amount));
+                break;
+            case SET:
+                this.setBudgetedAmount(amount);
+                break;
+        }
+        this.setAvailable(this.budgetedAmount.subtract(this.spent));
     }
 }

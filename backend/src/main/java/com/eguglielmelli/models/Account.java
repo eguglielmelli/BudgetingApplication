@@ -64,8 +64,29 @@ public class Account {
         this.balance = balance;
     }
 
-    public void adjustBalanceForTransaction(BigDecimal amount) {
-        BigDecimal currBalance = this.getBalance();
-        this.setBalance(currBalance.add(amount));
+    public void adjustBalanceForTransaction(Transaction transaction) {
+        switch(transaction.getAction()) {
+            case CREATE:
+            case UPDATE:
+                applyTransactionEffect(transaction);
+                break;
+            case DELETE:
+                reverseTransactionEffect(transaction);
+                break;
+        }
+    }
+    public void applyTransactionEffect(Transaction transaction) {
+        if(transaction.getType() == TransactionType.INFLOW) {
+            this.setBalance(this.balance.add(transaction.getAmount()));
+        }else {
+            this.setBalance(this.balance.subtract(transaction.getAmount()));
+        }
+    }
+    public void reverseTransactionEffect(Transaction transaction) {
+        if(transaction.getType() == TransactionType.INFLOW) {
+            this.setBalance(this.balance.subtract(transaction.getAmount()));
+        }else {
+            this.setBalance(this.balance.add(transaction.getAmount()));
+        }
     }
 }

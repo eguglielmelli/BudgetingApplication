@@ -1,5 +1,6 @@
 package com.eguglielmelli.controllers;
 import com.eguglielmelli.models.Category;
+import com.eguglielmelli.models.CategoryBudgetAction;
 import com.eguglielmelli.models.Transaction;
 import com.eguglielmelli.service.CategoryService;
 import org.springframework.http.HttpStatus;
@@ -87,9 +88,27 @@ public class CategoryController {
         }
     }
     @PutMapping("/{categoryId}/updateAmount")
-    public ResponseEntity<Category> updateBudgetedAmount(@PathVariable Long categoryId,@RequestBody  Map<String,BigDecimal> updatedAmount) {
-        BigDecimal newAmount = updatedAmount.get("updatedAmount");
-        Category category = categoryService.updateBudgetAmount(categoryId,newAmount);
+    public ResponseEntity<?> updateBudgetedAmount(@PathVariable Long categoryId,@RequestBody  Map<String,Object> requestBody) {
+        Map<String, Object> updatedAmount = (Map<String, Object>) requestBody.get("updatedAmount");
+        BigDecimal newAmount;
+        String amountString = (String) updatedAmount.get("amount");
+        if(amountString == null) {
+            return ResponseEntity.badRequest().body("Amount is missing");
+        }
+        try {
+            newAmount = new BigDecimal((String) updatedAmount.get("amount"));
+
+        }catch(NumberFormatException e) {
+            return ResponseEntity.badRequest().body("Could not parse updateAmount");
+        }
+        String actionString = (String) updatedAmount.get("action");
+        CategoryBudgetAction action;
+        try {
+            action = CategoryBudgetAction.valueOf(actionString);
+        }catch(IllegalArgumentException | NullPointerException e) {
+            return ResponseEntity.badRequest().body("Missing or invalid action");
+        }
+        Category category = categoryService.updateBudgetAmount(categoryId,action,newAmount);
         return ResponseEntity.ok(category);
     }
 

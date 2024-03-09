@@ -1,6 +1,7 @@
 package com.eguglielmelli.service;
 
 import com.eguglielmelli.models.Account;
+import com.eguglielmelli.models.Transaction;
 import com.eguglielmelli.models.User;
 import com.eguglielmelli.repositories.AccountRepository;
 import com.eguglielmelli.repositories.UserRepository;
@@ -52,6 +53,10 @@ public class AccountService {
         account.setAccountName(newName);
         return accountRepository.save(account);
 
+    }
+    @Transactional
+    public Account findAccountById(Long id) {
+        return accountRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("No transaction with that ID."));
     }
 
     @Transactional

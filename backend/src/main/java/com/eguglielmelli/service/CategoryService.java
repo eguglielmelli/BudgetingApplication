@@ -1,6 +1,7 @@
 package com.eguglielmelli.service;
 
 import com.eguglielmelli.models.Category;
+import com.eguglielmelli.models.CategoryBudgetAction;
 import com.eguglielmelli.models.Transaction;
 import com.eguglielmelli.models.TransactionType;
 import com.eguglielmelli.repositories.CategoryRepository;
@@ -50,14 +51,13 @@ public class CategoryService {
                 .map(Transaction::getAmount)
                 .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-
         return totalSpent;
     }
     @Transactional
     public BigDecimal calculateAvailableAmount(Long categoryId,Long userId) {
         Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new IllegalArgumentException("Category does not exist."));
         BigDecimal spent = calculateTotalSpentInCategory(categoryId,userId);
-        return category.getAvailable().subtract(spent);
+        return category.getBudgetedAmount().subtract(spent);
     }
     @Transactional
     public Category changeCategoryName(Long categoryId,String updatedName) {
@@ -69,9 +69,9 @@ public class CategoryService {
         return categoryRepository.save(foundCategory);
     }
     @Transactional
-    public Category updateBudgetAmount(Long id, BigDecimal amount) {
+    public Category updateBudgetAmount(Long id, CategoryBudgetAction action,BigDecimal amount) {
         Category category = categoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Category with that ID does not exist."));
-        category.adjustBudgetedAndAvailableAmount(amount);
+        category.adjustBudgetedAndAvailableAmount(action,amount);
         return category;
     }
     @Transactional

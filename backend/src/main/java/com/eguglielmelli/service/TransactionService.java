@@ -1,5 +1,6 @@
 package com.eguglielmelli.service;
 
+import com.eguglielmelli.dto.TransferFundsRequest;
 import com.eguglielmelli.models.*;
 import com.eguglielmelli.repositories.AccountRepository;
 import com.eguglielmelli.repositories.CategoryRepository;
@@ -33,85 +34,96 @@ public class TransactionService {
         if (accountId == null) {
             throw new IllegalArgumentException("Account ID must not be null");
         }
-        if (payeeId == null) {
-            throw new IllegalArgumentException("Payee ID must not be null");
-        }
-        if (categoryId == null) {
-            throw new IllegalArgumentException("Category ID must not be null");
-        }
         // Fetch the Account, Payee, and Category based on their IDs
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
-        Payee payee = payeeRepository.findById(payeeId)
-                .orElseThrow(() -> new RuntimeException("Payee not found"));
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        Payee payee = null;
+        if(payeeId != null) {
+            payee = payeeRepository.findById(payeeId)
+                    .orElseThrow(() -> new RuntimeException("Payee not found"));
+        }
+
+        Category category = null;
+        if(categoryId != null) {
+            category = categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+        }
+
 
         // Create a new Transaction
         Transaction transaction = new Transaction();
         transaction.setAccount(account);
         transaction.setPayee(payee);
         transaction.setCategory(category);
-        transaction.setAmount(type == TransactionType.OUTFLOW ? amount.negate() : amount);
-        transaction.getAccount().adjustBalanceForTransaction(transaction.getAmount());
-        category.adjustBalancesForTransaction(amount,type);
+        transaction.setAction(TransactionAction.CREATE);
+        transaction.setAmount(amount);
         transaction.setDate(date);
         transaction.setDescription(description);
         transaction.setType(type);
-
         validateTransaction(transaction);
+        transaction.getAccount().adjustBalanceForTransaction(transaction);
+        if(category != null) {
+            category.adjustBalancesForTransaction(transaction);
+        }
 
-        return transactionRepository.save(transaction);
+
+        return saveTransaction(transaction);
     }
 
 
     @Transactional
-    public Transaction save(Transaction transaction) {
+    public Transaction saveTransaction(Transaction transaction) {
         validateTransaction(transaction);
         return transactionRepository.save(transaction);
     }
 
     @Transactional
     public Transaction update(Long id,Transaction updatedTransaction) {
-        Transaction transaction = transactionRepository.findById(id).orElseThrow(() -> new RuntimeException("Transaction with that ID not found"));
+        Transaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Transaction with that ID not found"));
 
         transaction.setAccount(updatedTransaction.getAccount());
-        transaction.getAccount().adjustBalanceForTransaction(updatedTransaction.getAmount());
+        updatedTransaction.setAction(TransactionAction.UPDATE);
+        transaction.setAction(TransactionAction.UPDATE);
+        transaction.getAccount().adjustBalanceForTransaction(updatedTransaction);
         transaction.setAmount(updatedTransaction.getAmount());
         transaction.setCategory(updatedTransaction.getCategory());
-        updatedTransaction.getCategory().adjustBalancesForTransaction(updatedTransaction.getAmount(),updatedTransaction.getType());
         transaction.setDate(updatedTransaction.getDate());
         transaction.setDescription(updatedTransaction.getDescription());
         transaction.setPayee(updatedTransaction.getPayee());
         transaction.setType(updatedTransaction.getType());
+        transaction.getCategory().adjustBalancesForTransaction(transaction);
 
-        return transactionRepository.save(transaction);
+        return saveTransaction(transaction);
     }
 
     @Transactional
-    public void delete(Long id) {
+    public void deleteTransaction(Long id) {
         Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("There is no transaction with that ID."));
-
-        adjustAccountBalance(transaction.getAccount(),transaction);
-        adjustCategoryBalance(transaction.getCategory(),transaction);
+        transaction.setAction(TransactionAction.DELETE);
+        transaction.getAccount().adjustBalanceForTransaction(transaction);
+        transaction.getCategory().adjustBalancesForTransaction(transaction);
         transactionRepository.delete(transaction);
     }
 
     @Transactional
     public Transaction moveTransactionAccount(Long id, Account account) {
-        Transaction transaction = transactionRepository.findById(id).orElseThrow(() -> new RuntimeException("Transaction with that ID not found"));
+        Transaction transaction = transactionRepository.findById(id).
+                orElseThrow(() -> new RuntimeException("Transaction with that ID not found"));
 
-        validateTransactionForMove(transaction,account);
+        validateTransactionForMove(account);
 
         transaction.setAccount(account);
 
-        return transactionRepository.save(transaction);
+        return saveTransaction(transaction);
 
     }
     @Transactional
     public Transaction findTransactionById(Long id) {
-        Transaction transaction = transactionRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("No transaction with that ID."));
+        Transaction transaction = transactionRepository.findById(id).
+                orElseThrow(() -> new IllegalArgumentException("No transaction with that ID."));
         return transaction;
     }
 
@@ -138,10 +150,42 @@ public class TransactionService {
         }
         return transactionRepository.findByDateBetween(startDate,endDate);
     }
+    @Transactional
+    public void transferFundsBetweenAccounts(Long sourceAccountId,TransferFundsRequest transferRequest) {
+        if(transferRequest == null) {
+            throw new IllegalArgumentException("Transfer Request should not be null.");
+        }
+        if(transferRequest.getDestinationAccountName() == null || transferRequest.getDestinationAccountName().isEmpty()) {
+            throw new IllegalArgumentException("Destination name cannot be null or empty.");
+        }
+        Account sourceAccount = accountRepository.findByAccountId(sourceAccountId)
+                .orElseThrow(() -> new RuntimeException("Source account with that ID not found."));
+        Account destinationAccount = accountRepository.findByAccountName(transferRequest.getDestinationAccountName()).
+                orElseThrow(() -> new RuntimeException("Destination account with that name is not found."));
+
+
+        if(transferRequest.getDestinationAccountName().equals(sourceAccount.getAccountName())) {
+            throw new RuntimeException("Source and Destination Account cannot be the same");
+        }
+
+        if(transferRequest.getTransferAmount() == null || transferRequest.getTransferAmount().compareTo(new BigDecimal("0.00")) <= 0) {
+            throw new IllegalArgumentException("Transfer amount must be greater than 0 and must not be null.");
+        }
+
+        //create the transaction for the source account which will trigger a balance update
+        createTransaction(sourceAccount.getAccountId(),null,null,transferRequest.getTransferAmount(),transferRequest.getDate(),"transfer to/from " + destinationAccount.getAccountName(),transferRequest.getTransactionType());
+
+        if(transferRequest.getTransactionType() == TransactionType.INFLOW) {
+            createTransaction(destinationAccount.getAccountId(),null,null,transferRequest.getTransferAmount(),transferRequest.getDate(),"transfer to " + sourceAccount.getAccountName(),TransactionType.OUTFLOW);
+        }else {
+            createTransaction(destinationAccount.getAccountId(),null,null,transferRequest.getTransferAmount(),transferRequest.getDate(),"transfer from " + sourceAccount.getAccountName(),TransactionType.INFLOW);
+        }
+
+    }
 
     //Private helper methods dealing with validation
 
-    private void validateTransactionForMove(Transaction transaction,Account newAccount) {
+    private void validateTransactionForMove(Account newAccount) {
         if(newAccount == null) throw new IllegalArgumentException("New account cannot be null.");
 
     }
@@ -155,50 +199,12 @@ public class TransactionService {
             throw new IllegalArgumentException("Transaction must be associated with an account.");
         }
 
-        if (transaction.getPayee() == null) {
-            throw new IllegalArgumentException("Transaction must have a payee.");
-        }
-
-        if (transaction.getCategory() == null) {
-            throw new IllegalArgumentException("Transaction must have a category.");
-        }
-
         if (transaction.getDate() == null) {
             throw new IllegalArgumentException("Transaction date cannot be null.");
-        }
-
-        if (transaction.getDescription() == null || transaction.getDescription().trim().isEmpty()) {
-            throw new IllegalArgumentException("Transaction description cannot be empty.");
         }
 
         if (transaction.getType() == null) {
             throw new IllegalArgumentException("Transaction type must be specified.");
         }
-    }
-    @Transactional
-    private void adjustAccountBalance(Account account, Transaction transaction) {
-        BigDecimal transactionAmount = transaction.getAmount();
-
-        if (transaction.getType() == TransactionType.INFLOW) {
-            account.setBalance(account.getBalance().subtract(transactionAmount));
-        } else if (transaction.getType() == TransactionType.OUTFLOW) {
-            account.setBalance(account.getBalance().add(transactionAmount));
-        }
-
-        accountRepository.save(account);
-    }
-    @Transactional
-    private void adjustCategoryBalance(Category category, Transaction transaction) {
-        BigDecimal transactionAmount = transaction.getAmount();
-
-        if (transaction.getType() == TransactionType.INFLOW) {
-            category.setSpent(category.getSpent().subtract(transactionAmount));
-        } else if (transaction.getType() == TransactionType.OUTFLOW) {
-            category.setSpent(category.getSpent().add(transactionAmount));
-        }
-
-        category.setAvailable(category.getBudgetedAmount().subtract(category.getSpent()));
-
-        categoryRepository.save(category);
     }
 }
