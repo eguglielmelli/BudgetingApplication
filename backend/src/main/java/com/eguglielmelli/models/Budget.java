@@ -20,13 +20,13 @@ public class Budget {
     private Date timePeriod;
 
     @Column(name = "TotalIncome")
-    private BigDecimal totalIncome;
+    private BigDecimal totalIncome = BigDecimal.ZERO;
 
     @Column(name = "TotalExpense")
-    private BigDecimal totalExpense;
+    private BigDecimal totalExpense = BigDecimal.ZERO;
 
-    @Column(name = "readyToAssign", precision=10, scale=2, nullable=false)
-    private BigDecimal readyToAssign;
+    @Column(name = "ReadyToAssign", precision=10, scale=2, nullable=false)
+    private BigDecimal readyToAssign = BigDecimal.ZERO;
 
     public long getBudgetId() {
         return budgetId;
@@ -71,4 +71,7 @@ public class Budget {
         this.readyToAssign = readyToAssign;
     }
 
+    public void adjustReadyToAssign(BigDecimal amount) {
+        this.setReadyToAssign(this.readyToAssign.add(amount));
+    }
 }

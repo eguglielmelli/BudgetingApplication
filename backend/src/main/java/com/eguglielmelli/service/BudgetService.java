@@ -3,6 +3,7 @@ import com.eguglielmelli.models.Budget;
 import com.eguglielmelli.models.Transaction;
 import com.eguglielmelli.models.User;
 import com.eguglielmelli.repositories.BudgetRepository;
+import com.eguglielmelli.repositories.CategoryRepository;
 import com.eguglielmelli.repositories.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,11 +18,13 @@ public class BudgetService {
 
     private final BudgetRepository budgetRepository;
     private final TransactionRepository transactionRepository;
+    private final CategoryRepository categoryRepository;
 
     @Autowired
-    public BudgetService(BudgetRepository budgetRepository,TransactionRepository transactionRepository) {
+    public BudgetService(BudgetRepository budgetRepository,TransactionRepository transactionRepository,CategoryRepository categoryRepository) {
         this.budgetRepository = budgetRepository;
         this.transactionRepository = transactionRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Transactional

@@ -28,6 +28,10 @@ public class Category {
     @Column(name="Spent")
     private BigDecimal spent;
 
+    @ManyToOne
+    @JoinColumn(name = "BudgetID", referencedColumnName = "BudgetID")
+    private Budget budget;
+
     public BigDecimal getAvailable() {
         return available;
     }
@@ -75,6 +79,13 @@ public class Category {
 
     public void setBudgetedAmount(BigDecimal budgetedAmount) {
         this.budgetedAmount = budgetedAmount;
+    }
+
+    public void setBudget(Budget budget) {
+        this.budget = budget;
+    }
+    public Budget getBudget() {
+        return this.budget;
     }
 
 

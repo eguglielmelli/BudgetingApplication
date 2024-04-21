@@ -24,6 +24,10 @@ public class Account {
     @Column(name = "Balance")
     private BigDecimal balance;
 
+    @ManyToOne
+    @JoinColumn(name = "BudgetID", referencedColumnName = "BudgetID")
+    private Budget budget;
+
     public void setAccountId(Long accountId) {
         this.accountId = accountId;
     }
@@ -62,6 +66,13 @@ public class Account {
 
     public void setBalance(BigDecimal balance) {
         this.balance = balance;
+    }
+
+    public void setBudget(Budget budget) {
+        this.budget = budget;
+    }
+    public Budget getBudget() {
+        return this.budget;
     }
 
     public void adjustBalanceForTransaction(Transaction transaction) {

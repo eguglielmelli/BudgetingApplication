@@ -82,18 +82,30 @@ public class TransactionService {
     public Transaction update(Long id,Transaction updatedTransaction) {
         Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Transaction with that ID not found"));
+        Category updatedTransactionCategory = categoryRepository.findById(updatedTransaction.getCategory().getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Updated Category does not exist."));
+        Account updatedTransactionAccount = accountRepository.findByAccountId(updatedTransaction.getAccount().getAccountId())
+                        .orElseThrow(() -> new RuntimeException("Updated Account does not exist."));
+        Payee updatedTransactionPayee = payeeRepository.findById(updatedTransaction.getPayee().getPayeeId())
+                        .orElseThrow(() -> new RuntimeException("Updated Payee does not exist."));
 
-        transaction.setAccount(updatedTransaction.getAccount());
+        //need to fix the old transaction category amount still since it is being lost after updating to new category
+        if(!transaction.getCategory().equals(updatedTransactionCategory)) {
+            transaction.setAction(TransactionAction.DELETE);
+            transaction.getCategory().adjustBalancesForTransaction(transaction);
+        }else {
+            transaction.setAction(TransactionAction.UPDATE);
+        }
+        transaction.setAccount(updatedTransactionAccount);
         updatedTransaction.setAction(TransactionAction.UPDATE);
-        transaction.setAction(TransactionAction.UPDATE);
-        transaction.getAccount().adjustBalanceForTransaction(updatedTransaction);
         transaction.setAmount(updatedTransaction.getAmount());
-        transaction.setCategory(updatedTransaction.getCategory());
+        transaction.setCategory(updatedTransactionCategory);
         transaction.setDate(updatedTransaction.getDate());
         transaction.setDescription(updatedTransaction.getDescription());
-        transaction.setPayee(updatedTransaction.getPayee());
+        transaction.setPayee(updatedTransactionPayee);
         transaction.setType(updatedTransaction.getType());
-        transaction.getCategory().adjustBalancesForTransaction(transaction);
+        transaction.getAccount().adjustBalanceForTransaction(updatedTransaction);
+        transaction.getCategory().adjustBalancesForTransaction(updatedTransaction);
 
         return saveTransaction(transaction);
     }

@@ -112,5 +112,11 @@ public class CategoryController {
         return ResponseEntity.ok(category);
     }
 
+    @DeleteMapping("/{categoryId}/user/{userId}/delete")
+    public ResponseEntity<?> deleteCategory(@PathVariable Long categoryId, @PathVariable Long userId) {
+        categoryService.deleteCategory(categoryId,userId);
+        return ResponseEntity.ok().build();
+    }
+
 
 }

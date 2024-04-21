@@ -3,6 +3,8 @@ import com.eguglielmelli.models.Category;
 import com.eguglielmelli.models.Payee;
 import com.eguglielmelli.models.Transaction;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.Date;
 import java.util.List;
@@ -16,7 +18,8 @@ public interface TransactionRepository extends JpaRepository<Transaction,Long> {
 
     List<Transaction> findByDateBetween(Date startDate, Date endDate);
 
-    List<Transaction> findByCategory_User_UserIdAndCategory_CategoryId(Long userId, Long categoryId);
+    @Query("SELECT t FROM Transaction t WHERE t.category.id = :categoryId AND t.category.user.id = :userId")
+    List<Transaction> findTransactionsByCategoryIdAndUserId(@Param("categoryId") Long categoryId, @Param("userId") Long userId);
 
     List<Transaction> findByCategory_User_UserIdAndDateBetween(Long userId,Date startDate,Date endDate);
 }

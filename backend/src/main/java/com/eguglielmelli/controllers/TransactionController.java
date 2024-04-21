@@ -30,8 +30,8 @@ public class TransactionController {
     }
     @PutMapping("/{id}/update")
     public ResponseEntity<Transaction> updateTransaction(@PathVariable Long id, @RequestBody Transaction transaction) {
-        transactionService.update(id,transaction);
-        return ResponseEntity.ok().build();
+        Transaction updatedTransaction = transactionService.update(id,transaction);
+        return ResponseEntity.ok().body(updatedTransaction);
     }
     @GetMapping("/{id}")
     public ResponseEntity<Transaction> getTransaction(@PathVariable Long id) {
